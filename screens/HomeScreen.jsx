@@ -1,8 +1,7 @@
-import { View, Text, Pressable } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { View, Text } from "react-native";
 import Navbar from "../components/NavBar";
 
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen() {
     return (
         <View>
             <Navbar />

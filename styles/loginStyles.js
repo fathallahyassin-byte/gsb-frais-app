@@ -4,7 +4,7 @@ const loginStyles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#f5f5f5",
         justifyContent: "center",
-        paddingHorizontal: 6,
+        paddingHorizontal: 24,
     },
     title: {
         color: "#3a3a3a",
@@ -18,7 +18,7 @@ const loginStyles = StyleSheet.create({
     },
     label: {
         color: "#333",
-        fontSize: 8,
+        fontSize: 14,
         marginBottom: 5,
     },
     input: {
@@ -26,8 +26,8 @@ const loginStyles = StyleSheet.create({
         borderColor: "#d5d5d5",
         borderRadius: 4,
         borderWidth: 1,
-        fontSize: 12,
-        height: 30,
+        fontSize: 16,
+        height: 44,
         marginBottom: 12,
         paddingHorizontal: 8,
     },
@@ -35,13 +35,13 @@ const loginStyles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: "#333",
         borderRadius: 5,
-        height: 30,
+        height: 44,
         justifyContent: "center",
         marginTop: 4,
     },
     buttonText: {
         color: "#fff",
-        fontSize: 9,
+        fontSize: 16,
         fontWeight: "600",
     },
 });
