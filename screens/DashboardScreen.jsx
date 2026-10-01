@@ -59,6 +59,14 @@ export default function DashboardScreen() {
 	return (
 		<View style={styles.screen}>
 			<Navbar />
+			{/*
+				Question 14 : avantage d'ActivityIndicator par rapport à <Text>Chargement...</Text>
+				- C'est un composant natif : il affiche le symbole de chargement d'Android ou d'iOS,
+				  que l'utilisateur reconnaît tout de suite.
+				- Il est animé : on voit que l'application travaille et n'est pas figée.
+				- Il se personnalise avec les props size et color, et animating permet de le masquer.
+				- Il est reconnu par les lecteurs d'écran (accessibilité) et n'a pas de texte à traduire.
+			*/}
 			{loading ? (
 				<ActivityIndicator size="large" style={{ marginTop: 40 }} />
 			) : (
@@ -82,6 +90,21 @@ export default function DashboardScreen() {
 						keyboardType="numeric"
 						style={styles.searchInput}
 					/>
+					{/*
+						Question 7 : informations affichées sur la carte FraisCard
+						Un écran de téléphone fait environ 360 points de large : les 8 informations
+						ne tiennent pas sur une ligne, je les ai donc classées par priorité.
+						- En priorité (titre) : année-mois, ID visiteur et ID de la note. Le mois est le
+						  premier repère du visiteur, l'ID visiteur sert à la recherche, et l'ID de la note
+						  permet de citer une note précise.
+						- Mis en avant (gras, vert) : montant validé, car c'est ce qui sera remboursé.
+						  S'il vaut null, on affiche « non validé ».
+						- Normal : nombre de justificatifs et montant saisi. Ils expliquent le montant
+						  validé et permettent de le comparer à ce qui a été demandé.
+						- Second plan (petit, gris) : date de modification, utile mais secondaire.
+						- Masqué : ID état, identifiant technique sans sens pour le visiteur
+						  (un libellé comme « Validée » serait préférable).
+					*/}
 					<FlatList
 						data={filteredFrais}
 						keyExtractor={(item) => item.id_frais.toString()}
