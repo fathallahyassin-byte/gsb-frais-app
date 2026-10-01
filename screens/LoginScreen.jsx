@@ -2,7 +2,7 @@ import { Alert, Pressable, Text, TextInput, View } from "react-native";
 import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
-import loginStyles from "../styles/loginStyles";
+import { loginStyles as styles } from "../styles/loginStyles.js";
 
 export default function LoginScreen() {
     // 1. États locaux pour les champs du formulaire
@@ -22,26 +22,26 @@ export default function LoginScreen() {
 
     // 2. Rend le formulaire
     return (
-        <View style={loginStyles.container}>
-            <Text style={loginStyles.title}>Connexion</Text>
-            <View style={loginStyles.form}>
-                <Text style={loginStyles.label}>Login :</Text>
+        <View style={styles.container}>
+            <Text style={styles.title}>Connexion</Text>
+            <View style={styles.form}>
+                <Text style={styles.label}>Login :</Text>
                 <TextInput
                     value={login}
                     onChangeText={setLogin}
                     autoCapitalize="none"
-                    style={loginStyles.input}
+                    style={styles.input}
                 />
-                <Text style={loginStyles.label}>Mot de passe :</Text>
+                <Text style={styles.label}>Mot de passe :</Text>
                 <TextInput
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry
-                    style={loginStyles.input}
+                    style={styles.input}
                 />
             </View>
-            <Pressable onPress={handleSubmit} style={loginStyles.button}>
-                <Text style={loginStyles.buttonText}>Se connecter</Text>
+            <Pressable onPress={handleSubmit} style={styles.button}>
+                <Text style={styles.buttonText}>Se connecter</Text>
             </Pressable>
         </View>
     );
