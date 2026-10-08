@@ -8,15 +8,13 @@ import {
 	ActivityIndicator,
 	StyleSheet,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import Navbar from "../components/NavBar";
 import FraisCard from "../components/FraisCard";
-import fraisData from "../data/frais.json";
 import { useAuth } from "../context/AuthContext";
+import { API_URL } from "../services/authService.js";
 
 export default function DashboardScreen() {
-	const { user } = useAuth();
-	const navigation = useNavigation();
+	const { user, token } = useAuth();
 
 	const [fraisList, setFraisList] = useState([]);
 	const [loading, setLoading] = useState(true);
@@ -24,22 +22,39 @@ export default function DashboardScreen() {
 	const [filterNonNull, setFilterNonNull] = useState(true);
 	const [montantMin, setMontantMin] = useState("");
 
-	useEffect(() => {
-		if (!user) {
-			navigation.replace("Login");
-		}
-	}, [user, navigation]);
+useEffect(() => {
+	let active = true;
 
-	useEffect(() => {
-		// Simulation d'un appel API avec un délai de 500 ms
-		const timer = setTimeout(() => {
-			setFraisList(fraisData);
+	async function fetchFrais() {
+		if (!user?.id_visiteur || !token) {
 			setLoading(false);
-		}, 500);
-		// Annule le timer si l'écran est quitté avant la fin du chargement
-		return () => clearTimeout(timer);
-	}, []);
+			return;
+		}
 
+		try {
+			const response = await fetch(`${API_URL}frais/liste/${user.id_visiteur}`, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(data.error || `Erreur HTTP ${response.status}`);
+			}
+
+			const frais = Array.isArray(data) ? data : data.frais ?? data.data ?? [];
+			if (active) setFraisList(frais);
+		} catch (error) {
+			console.error("Impossible de charger les notes de frais :", error);
+		} finally {
+			if (active) setLoading(false);
+		}
+	}
+
+	fetchFrais();
+	return () => {
+		active = false;
+	};
+}, [user?.id_visiteur, token]);
 	// Accepte "150,5" comme "150.5" ; champ vide ou invalide = pas de filtre
 	const seuil = parseFloat(montantMin.replace(",", "."));
 

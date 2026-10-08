@@ -1,6 +1,5 @@
-import { Alert, Pressable, Text, TextInput, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useState } from "react";
-import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
 import { loginStyles as styles } from "../styles/loginStyles.js";
 
@@ -8,18 +7,23 @@ export default function LoginScreen() {
     // 1. États locaux pour les champs du formulaire
     const [login, setLogin] = useState("");
     const [password, setPassword] = useState("");
+    const [submitting, setSubmitting] = useState(false);
     const { loginUser } = useAuth();
-    const navigation = useNavigation();
 
-    const handleSubmit = () => {
-        if (loginUser(login, password)) {
-            navigation.navigate("Dashboard");
-            return;
+    const handleSubmit = async () => {
+        setSubmitting(true);
+        try {
+            const data = await loginUser(login, password);
+            if (!data?.visiteur || !data?.token) {
+                Alert.alert("Connexion échouée", data?.message || "Vérifiez votre login et votre mot de passe.");
+                return;
+            }
+        } catch (error) {
+            Alert.alert("Connexion impossible", error.message || "Vérifiez votre connexion et réessayez.");
+        } finally {
+            setSubmitting(false);
         }
-
-        Alert.alert("Erreur", "Identifiants/MDP incorrects");
     };
-
     // 2. Rend le formulaire
     return (
         <View style={styles.container}>
@@ -40,8 +44,8 @@ export default function LoginScreen() {
                     style={styles.input}
                 />
             </View>
-            <Pressable onPress={handleSubmit} style={styles.button}>
-                <Text style={styles.buttonText}>Se connecter</Text>
+            <Pressable onPress={handleSubmit} style={styles.button} disabled={submitting}>
+                <Text style={styles.buttonText}>{submitting ? "Connexion..." : "Se connecter"}</Text>
             </Pressable>
         </View>
     );

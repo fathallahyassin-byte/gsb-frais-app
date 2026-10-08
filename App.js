@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator } from 'react-native';
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "./screens/HomeScreen";
@@ -10,13 +10,23 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 const Stack = createNativeStackNavigator();
 
 function AppNavigator() {
-  const { user } = useAuth();
+  const { user, sessionLoading } = useAuth();
+
+  if (sessionLoading) {
+    return <ActivityIndicator size="large" style={{ flex: 1 }} />;
+  }
 
   return (
-    <Stack.Navigator initialRouteName={user ? "Dashboard" : "Home"}>
+    <Stack.Navigator
+      key={user ? "authenticated" : "anonymous"}
+      initialRouteName={user ? "Dashboard" : "Home"}
+    >
       <Stack.Screen name="Home" component={HomeScreen} />
-      <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Dashboard" component={DashboardScreen} />
+      {user ? (
+        <Stack.Screen name="Dashboard" component={DashboardScreen} />
+      ) : (
+        <Stack.Screen name="Login" component={LoginScreen} />
+      )}
     </Stack.Navigator>
   );
 }
