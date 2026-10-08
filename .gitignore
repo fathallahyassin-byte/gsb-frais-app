@@ -42,3 +42,6 @@ yarn-error.*
 
 # Énoncés de TP
 *.pdf
+
+# outils locaux
+.claude/
