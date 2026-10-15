@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import {
 	View,
 	Text,
@@ -6,12 +6,16 @@ import {
 	Switch,
 	FlatList,
 	ActivityIndicator,
+	Alert,
+	Platform,
 	StyleSheet,
 } from "react-native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Navbar from "../components/NavBar";
 import FraisCard from "../components/FraisCard";
 import { useAuth } from "../context/AuthContext";
-import { API_URL } from "../services/authService.js";
+import { API_URL } from "../config";
 
 export default function DashboardScreen() {
 	const { user, token } = useAuth();
@@ -19,42 +23,83 @@ export default function DashboardScreen() {
 	const [fraisList, setFraisList] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [searchTerm, setSearchTerm] = useState("");
-	const [filterNonNull, setFilterNonNull] = useState(true);
+	const [filterNonNull, setFilterNonNull] = useState(false);
 	const [montantMin, setMontantMin] = useState("");
+	const navigation = useNavigation();
 
-useEffect(() => {
-	let active = true;
+	// useFocusEffect recharge la liste à chaque retour sur l'écran (après un ajout ou une modification)
+	useFocusEffect(
+		useCallback(() => {
+			let active = true;
 
-	async function fetchFrais() {
-		if (!user?.id_visiteur || !token) {
-			setLoading(false);
-			return;
-		}
+			async function fetchFrais() {
+				if (!user?.id_visiteur || !token) {
+					setLoading(false);
+					return;
+				}
 
-		try {
-			const response = await fetch(`${API_URL}frais/liste/${user.id_visiteur}`, {
-				headers: { Authorization: `Bearer ${token}` },
-			});
-			const data = await response.json();
+				try {
+					const response = await fetch(`${API_URL}frais/liste/${user.id_visiteur}`, {
+						headers: { Authorization: `Bearer ${token}` },
+					});
+					const data = await response.json();
 
-			if (!response.ok) {
-				throw new Error(data.error || `Erreur HTTP ${response.status}`);
+					if (!response.ok) {
+						throw new Error(data.error || `Erreur HTTP ${response.status}`);
+					}
+
+					const frais = Array.isArray(data) ? data : data.frais ?? data.data ?? [];
+					if (active) setFraisList(frais);
+				} catch (error) {
+					console.error("Impossible de charger les notes de frais :", error);
+				} finally {
+					if (active) setLoading(false);
+				}
 			}
 
-			const frais = Array.isArray(data) ? data : data.frais ?? data.data ?? [];
-			if (active) setFraisList(frais);
+			fetchFrais();
+			return () => {
+				active = false;
+			};
+		}, [user?.id_visiteur, token])
+	);
+
+	// Ouverture du formulaire de modification
+	function handleEdit(id) {
+		navigation.navigate("FraisEdit", { id });
+	}
+
+	async function deleteFrais(id) {
+		try {
+			const token = await AsyncStorage.getItem("token");
+			const response = await fetch(`${API_URL}frais/suppr`, {
+				method: "DELETE",
+				headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+				body: JSON.stringify({ id_frais: id }),
+			});
+			if (!response.ok) {
+				const data = await response.json().catch(() => ({}));
+				throw new Error(data.error || `Erreur HTTP ${response.status}`);
+			}
+			setFraisList((liste) => liste.filter((f) => f.id_frais !== id));
 		} catch (error) {
-			console.error("Impossible de charger les notes de frais :", error);
-		} finally {
-			if (active) setLoading(false);
+			console.error("Erreur lors de la suppression:", error);
 		}
 	}
 
-	fetchFrais();
-	return () => {
-		active = false;
+	// Pas de window.confirm sur mobile : Alert.alert avec un bouton Annuler et un bouton Supprimer
+	const handleDelete = (id) => {
+		const message = "Êtes-vous sûr de vouloir supprimer cette note de frais ?";
+		// Alert.alert n'affiche pas de boutons dans l'aperçu web : on y utilise window.confirm
+		if (Platform.OS === "web") {
+			if (window.confirm(message)) deleteFrais(id);
+			return;
+		}
+		Alert.alert("Confirmation", message, [
+			{ text: "Annuler", style: "cancel" },
+			{ text: "Supprimer", style: "destructive", onPress: () => deleteFrais(id) },
+		]);
 	};
-}, [user?.id_visiteur, token]);
 	// Accepte "150,5" comme "150.5" ; champ vide ou invalide = pas de filtre
 	const seuil = parseFloat(montantMin.replace(",", "."));
 
@@ -123,7 +168,9 @@ useEffect(() => {
 					<FlatList
 						data={filteredFrais}
 						keyExtractor={(item) => item.id_frais.toString()}
-						renderItem={({ item }) => <FraisCard frais={item} />}
+						renderItem={({ item }) => (
+							<FraisCard frais={item} onEdit={handleEdit} onDelete={handleDelete} />
+						)}
 						ListEmptyComponent={
 							<Text style={styles.empty}>Aucune note de frais trouvée</Text>
 						}

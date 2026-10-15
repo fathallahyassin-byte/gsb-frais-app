@@ -1,6 +1,7 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 
-export default function FraisCard({ frais }) {
+// La carte ne fait qu'afficher : les actions sont fournies par le parent Dashboard
+export default function FraisCard({ frais, onEdit, onDelete }) {
     const montantValide =
         frais.montantvalide !== null ? `${frais.montantvalide} €` : "non validé";
 
@@ -12,7 +13,17 @@ export default function FraisCard({ frais }) {
             <Text style={styles.meta}>Nombre de justificatifs : {frais.nbjustificatifs}</Text>
             <Text style={styles.montant}>Montant validé : {montantValide}</Text>
             <Text style={styles.meta}>Montant saisi : — €</Text>
+            {frais.lib_etat ? <Text style={styles.meta}>État : {frais.lib_etat}</Text> : null}
             <Text style={styles.secondary}>Modifiée le {frais.datemodification}</Text>
+
+            <View style={styles.actions}>
+                <Pressable onPress={() => onEdit(frais.id_frais)} style={styles.editButton}>
+                    <Text style={styles.editText}>Modifier</Text>
+                </Pressable>
+                <Pressable onPress={() => onDelete(frais.id_frais)} style={styles.deleteButton}>
+                    <Text style={styles.deleteText}>Supprimer</Text>
+                </Pressable>
+            </View>
         </View>
     );
 }
@@ -49,5 +60,31 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: "#9AA0AA",
         marginTop: 6,
+    },
+    actions: {
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        gap: 8,
+        marginTop: 12,
+    },
+    editButton: {
+        borderWidth: 1,
+        borderColor: "#5B6270",
+        borderRadius: 6,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+    },
+    editText: {
+        color: "#161B33",
+    },
+    deleteButton: {
+        borderWidth: 1,
+        borderColor: "#D9534F",
+        borderRadius: 6,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+    },
+    deleteText: {
+        color: "#D9534F",
     },
 });
