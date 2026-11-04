@@ -8,12 +8,9 @@ function Navbar() {
     const { user, logoutUser } = useAuth();
 
     const handleAuthPress = () => {
+        // À la déconnexion, AppNavigator passe sur le groupe "invite" et affiche Home
         if (user) {
             logoutUser();
-            navigation.reset({
-                index: 0,
-                routes: [{ name: "Home" }],
-            });
             return;
         }
 
