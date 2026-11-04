@@ -2,11 +2,17 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../config";
 
 export async function signIn(login, pwd) {
-    const response = await fetch(`${API_URL}visiteur/auth`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ login, pwd }),
-    });
+    let response;
+    try {
+        response = await fetch(`${API_URL}visiteur/auth`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ login, pwd }),
+        });
+    } catch {
+        // Pas de réponse du serveur : pas de réseau (mode avion...) ou API injoignable
+        throw new Error("Impossible de joindre le serveur. Vérifiez votre connexion internet.");
+    }
 
     let data;
     try {

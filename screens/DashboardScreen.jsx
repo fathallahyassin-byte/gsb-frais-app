@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+	import { useState, useCallback } from "react";
 import {
 	View,
 	Text,
@@ -10,14 +10,13 @@ import {
 	Platform,
 	StyleSheet,
 } from "react-native";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 import Navbar from "../components/NavBar";
 import FraisCard from "../components/FraisCard";
 import { useAuth } from "../context/AuthContext";
-import { API_URL } from "../config";
+import { getFraisList, deleteFrais } from "../services/fraisService";
 
-export default function DashboardScreen() {
+export default function DashboardScreen({ navigation }) {
 	const { user, token } = useAuth();
 
 	const [fraisList, setFraisList] = useState([]);
@@ -25,7 +24,7 @@ export default function DashboardScreen() {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [filterNonNull, setFilterNonNull] = useState(false);
 	const [montantMin, setMontantMin] = useState("");
-	const navigation = useNavigation();
+	const [error, setError] = useState("");
 
 	// useFocusEffect recharge la liste à chaque retour sur l'écran (après un ajout ou une modification)
 	useFocusEffect(
@@ -39,19 +38,15 @@ export default function DashboardScreen() {
 				}
 
 				try {
-					const response = await fetch(`${API_URL}frais/liste/${user.id_visiteur}`, {
-						headers: { Authorization: `Bearer ${token}` },
-					});
-					const data = await response.json();
-
-					if (!response.ok) {
-						throw new Error(data.error || `Erreur HTTP ${response.status}`);
+					const data = await getFraisList(user.id_visiteur, token);
+					const frais = Array.isArray(data) ? data : data?.frais ?? data?.data ?? [];
+					if (active) {
+						setFraisList(frais);
+						setError("");
 					}
-
-					const frais = Array.isArray(data) ? data : data.frais ?? data.data ?? [];
-					if (active) setFraisList(frais);
-				} catch (error) {
-					console.error("Impossible de charger les notes de frais :", error);
+				} catch (err) {
+					console.error("Erreur lors de la récupération des frais :", err);
+					if (active) setError(err.message);
 				} finally {
 					if (active) setLoading(false);
 				}
@@ -69,21 +64,13 @@ export default function DashboardScreen() {
 		navigation.navigate("FraisEdit", { id });
 	}
 
-	async function deleteFrais(id) {
+	// Renommée removeFrais pour ne pas masquer deleteFrais importée du service
+	async function removeFrais(id) {
 		try {
-			const token = await AsyncStorage.getItem("token");
-			const response = await fetch(`${API_URL}frais/suppr`, {
-				method: "DELETE",
-				headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-				body: JSON.stringify({ id_frais: id }),
-			});
-			if (!response.ok) {
-				const data = await response.json().catch(() => ({}));
-				throw new Error(data.error || `Erreur HTTP ${response.status}`);
-			}
-			setFraisList((liste) => liste.filter((f) => f.id_frais !== id));
+			await deleteFrais(id, token);
+			setFraisList((prev) => prev.filter((f) => f.id_frais !== id));
 		} catch (error) {
-			console.error("Erreur lors de la suppression:", error);
+			Alert.alert("Erreur lors de la suppression :", error.message);
 		}
 	}
 
@@ -92,12 +79,12 @@ export default function DashboardScreen() {
 		const message = "Êtes-vous sûr de vouloir supprimer cette note de frais ?";
 		// Alert.alert n'affiche pas de boutons dans l'aperçu web : on y utilise window.confirm
 		if (Platform.OS === "web") {
-			if (window.confirm(message)) deleteFrais(id);
+			if (window.confirm(message)) removeFrais(id);
 			return;
 		}
 		Alert.alert("Confirmation", message, [
 			{ text: "Annuler", style: "cancel" },
-			{ text: "Supprimer", style: "destructive", onPress: () => deleteFrais(id) },
+			{ text: "Supprimer", style: "destructive", onPress: () => removeFrais(id) },
 		]);
 	};
 	// Accepte "150,5" comme "150.5" ; champ vide ou invalide = pas de filtre
@@ -165,6 +152,7 @@ export default function DashboardScreen() {
 						- Masqué : ID état, identifiant technique sans sens pour le visiteur
 						  (un libellé comme « Validée » serait préférable).
 					*/}
+					{error ? <Text style={styles.error}>{error}</Text> : null}
 					<FlatList
 						data={filteredFrais}
 						keyExtractor={(item) => item.id_frais.toString()}
@@ -210,6 +198,10 @@ const styles = StyleSheet.create({
 		flex: 1,
 		fontSize: 14,
 		color: "#333333",
+	},
+	error: {
+		color: "red",
+		marginBottom: 12,
 	},
 	empty: {
 		textAlign: "center",
