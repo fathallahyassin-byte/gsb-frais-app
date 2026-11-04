@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "gsb-frais-app",
+    "name": "GSB Frais",
     "slug": "gsb-frais-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,6 +10,8 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.yassinfathallah.gsbfrais",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
