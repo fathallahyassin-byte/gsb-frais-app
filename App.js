@@ -7,6 +7,9 @@ import LoginScreen from "./screens/LoginScreen";
 import DashboardScreen from "./screens/DashboardScreen";
 import FraisAddScreen from "./screens/FraisAddScreen";
 import FraisEditScreen from "./screens/FraisEditScreen";
+import FraisHorsForfaitScreen from "./screens/FraisHorsForfaitScreen";
+import FraisHorsForfaitAddScreen from "./screens/FraisHorsForfaitAddScreen";
+import FraisHorsForfaitEditScreen from "./screens/FraisHorsForfaitEditScreen";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 const Stack = createNativeStackNavigator();
@@ -27,6 +30,9 @@ function AppNavigator() {
           <Stack.Screen name="Dashboard" component={DashboardScreen} />
           <Stack.Screen name="FraisAdd" component={FraisAddScreen} />
           <Stack.Screen name="FraisEdit" component={FraisEditScreen} />
+          <Stack.Screen name="FraisHorsForfait" component={FraisHorsForfaitScreen} />
+          <Stack.Screen name="FraisHorsForfaitAdd" component={FraisHorsForfaitAddScreen} />
+          <Stack.Screen name="FraisHorsForfaitEdit" component={FraisHorsForfaitEditScreen} />
           <Stack.Screen name="Home" component={HomeScreen} />
         </Stack.Group>
       ) : (

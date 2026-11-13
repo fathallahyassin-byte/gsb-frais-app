@@ -50,7 +50,13 @@ export default function FraisEditScreen({ navigation, route }) {
     } else if (!frais) {
         content = <Text style={styles.notFound}>{error || "Frais non trouvé"}</Text>;
     } else {
-        content = <FraisForm frais={frais} onSubmit={handleUpdate} />;
+        content = (
+            <FraisForm
+                frais={frais}
+                onSubmit={handleUpdate}
+                onHorsForfait={() => navigation.navigate("FraisHorsForfait", { id: frais.id_frais })}
+            />
+        );
     }
 
     return (

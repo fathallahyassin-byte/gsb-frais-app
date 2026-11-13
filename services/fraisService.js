@@ -54,3 +54,33 @@ export function deleteFrais(idFrais, token) {
         body: JSON.stringify({ id_frais: idFrais }),
     });
 }
+
+// Frais hors forfait (rattachés à une note de frais)
+export function getFraisHorsForfaitList(idFrais, token) {
+    return request(`fraisHF/liste/${idFrais}`, token);
+}
+
+export function getFraisHorsForfait(idFraisHF, token) {
+    return request(`fraisHF/${idFraisHF}`, token);
+}
+
+export function addFraisHorsForfait(fraisHF, token) {
+    return request("fraisHF/ajout", token, {
+        method: "POST",
+        body: JSON.stringify(fraisHF),
+    });
+}
+
+export function updateFraisHorsForfait(fraisHF, token) {
+    return request("fraisHF/modif", token, {
+        method: "POST",
+        body: JSON.stringify(fraisHF),
+    });
+}
+
+export function deleteFraisHorsForfait(idFraisHF, token) {
+    return request("fraisHF/suppr", token, {
+        method: "DELETE",
+        body: JSON.stringify({ id_fraisHF: idFraisHF }),
+    });
+}

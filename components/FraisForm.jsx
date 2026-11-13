@@ -1,14 +1,11 @@
 import { useState, useEffect } from "react";
 import { View, Text, TextInput, Pressable } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { fraisFormStyles as styles } from "../styles/fraisFormStyles.js";
 
 // Formulaire de saisie : il remonte les valeurs à l'écran via onSubmit,
-// c'est l'écran (ajout ou modification) qui appelle l'API
-export default function FraisForm({ frais = null, onSubmit }) {
-    // Utilisé uniquement pour les boutons frais hors forfait / au forfait (pas encore implémentés)
-    const navigation = useNavigation();
-
+// c'est l'écran (ajout ou modification) qui appelle l'API.
+// onHorsForfait n'est fourni qu'en modification (en ajout la note n'existe pas encore)
+export default function FraisForm({ frais = null, onSubmit, onHorsForfait }) {
     // États locaux du formulaire
     const [anneeMois, setAnneeMois] = useState("");
     const [nbJustificatifs, setNbJustificatifs] = useState("");
@@ -82,9 +79,11 @@ export default function FraisForm({ frais = null, onSubmit }) {
             </View>
 
             <View style={styles.smallButtonRow}>
-                <Pressable style={[styles.smallbutton, styles.buttonDisabled]} disabled={loading}>
-                    <Text style={styles.buttonText}>Frais hors forfait</Text>
-                </Pressable>
+                {onHorsForfait ? (
+                    <Pressable style={styles.smallbutton} onPress={onHorsForfait} disabled={loading}>
+                        <Text style={styles.buttonText}>Frais hors forfait</Text>
+                    </Pressable>
+                ) : null}
                 <Pressable style={[styles.smallbutton, styles.buttonDisabled]} disabled={loading}>
                     <Text style={styles.buttonText}>Frais au forfait</Text>
                 </Pressable>
